@@ -1,0 +1,22 @@
+{
+  "name": "wht-api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "DEBUG=socket.io* nodemon ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.18.2",
+    "cookie-parser": "~1.4.3",
+    "cors": "^2.8.4",
+    "debug": "~2.6.9",
+    "express": "~4.15.5",
+    "mongoose": "^5.0.11",
+    "morgan": "~1.9.0",
+    "node-google-translate-skidz": "^1.1.1",
+    "request": "^2.85.0",
+    "serve-favicon": "~2.4.5",
+    "socket.io": "^2.0.4"
+  }
+}
