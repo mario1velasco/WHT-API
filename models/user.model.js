@@ -1,7 +1,12 @@
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
-const Schema   = mongoose.Schema;
+const Schema = mongoose.Schema;
 const SALT_WORK_FACTOR = 10;
+
+const ROLE_ADMIN = 'ADMIN';
+const ROLE_SUPERUSER = 'SUPERUSER';
+const ROLE_USER = 'USER';
+const ROLE_INVITED = 'INVITED';
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -13,7 +18,50 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'User needs a password']
+    required: [true, 'User needs a password'],
+    match: [/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, 'Password: Minimum eight characters, at least one letter and one number'],
+  },
+  username: {
+    type: String,
+    unique: true
+  },
+  social: {
+    facebookId: String,
+    googleId: String
+  },
+  name: {
+    type: String
+  },
+  familyname: {
+    type: String
+  },
+  telephone: {
+    type: String
+  },
+  role: {
+    type: String,
+    enum: [ROLE_ADMIN, ROLE_SUPERUSER, ROLE_USER, ROLE_INVITED],
+    default: ROLE_USER
+  },
+  friends: {
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    default: []
+  },
+  about: {
+    type: String
+  },
+  language: {
+    type: String,
+    default: "en"
+  },
+  photo: {
+    type: String
+  },
+  expireSuperUser:{
+    type: String
   }
 }, {
   timestamps: true,
@@ -34,7 +82,9 @@ userSchema.pre('save', function save(next) {
   if (!user.isModified('password')) {
     return next();
   }
-
+  if (user.isAdmin()) {
+    user.role = 'ADMIN';
+  }
   bcrypt.genSalt(SALT_WORK_FACTOR)
     .then(salt => {
       bcrypt.hash(user.password, salt)
@@ -51,6 +101,9 @@ userSchema.methods.checkPassword = function (password) {
   return bcrypt.compare(password, this.password);
 }
 
-const User = mongoose.model('User', userSchema);
+userSchema.methods.isAdmin = function () {
+  return this.username === ROLE_ADMIN;
+};
 
+const User = mongoose.model('User', userSchema);
 module.exports = User;
