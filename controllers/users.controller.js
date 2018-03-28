@@ -12,11 +12,10 @@ module.exports.create = (req, res, next) => {
           email: req.body.email,
           password: req.body.password
         });
-
         user
           .save()
           .then(() => {
-            res.status(200).json({ message: 'Success' });
+            res.status(200).json(user);
           })
           .catch(error => {
             if (error instanceof mongoose.Error.ValidationError) {

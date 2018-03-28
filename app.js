@@ -13,12 +13,14 @@ const mongoose = require('mongoose');
 require('./config/db.config');
 require('./config/passport.config').setup(passport);
 
-const corsConfig = require('./config/cors.config');
+// const corsConfig = require('./config/cors.config');
 const usersRoutes = require('./routes/user.routes');
 const sessionRoutes = require('./routes/session.routes');
 
 var app = express();
 
+//Permito el paso de todo
+app.use(cors())
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
