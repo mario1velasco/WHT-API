@@ -23,6 +23,15 @@ app.use(cors(corsConfig))
 //Permito el paso de todo
 // app.use(cors())
 
+// Add headers
+app.use(function (req, res, next) {
+  // Set to true if you need the website to include cookies in the requests sent
+  // to the API (e.g. in case you use sessions)
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  // Pass to next layer of middleware
+  next();
+});
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
