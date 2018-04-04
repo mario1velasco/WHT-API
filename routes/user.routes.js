@@ -6,5 +6,7 @@ const secureMiddleware = require('../middleware/secure.middleware');
 
 router.get('/:id', secureMiddleware.isAuthenticated, usersController.get);
 router.post('/', usersController.create);
+// router.put('/:id', usersController.edit);
+router.put('/:id', secureMiddleware.isAuthenticated, usersController.edit);
 
 module.exports = router;

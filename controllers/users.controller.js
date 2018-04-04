@@ -40,3 +40,22 @@ module.exports.get = (req, res, next) => {
       }
     }).catch(error => next(error));
 }
+
+module.exports.edit = (req, res, next) => {
+  const id = req.params.id;
+  
+  User.findByIdAndUpdate(id, { $set: req.body }, { new: true })
+    .then(user => {
+      if (user) {
+        res.json(user)
+      } else {
+        next(new ApiError(`User not found`, 404));
+      }
+    }).catch(error => {
+      if (error instanceof mongoose.Error.ValidationError) {
+        next(new ApiError(error.message, 400, error.errors));
+      } else {
+        next(new ApiError(error.message, 500));
+      }
+    });
+}
