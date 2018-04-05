@@ -43,6 +43,7 @@ module.exports.get = (req, res, next) => {
 
 module.exports.edit = (req, res, next) => {
   const id = req.params.id;
+  console.log(req.user);
   
   User.findByIdAndUpdate(id, { $set: req.body }, { new: true })
     .then(user => {
