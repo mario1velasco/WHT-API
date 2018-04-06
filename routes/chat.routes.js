@@ -6,7 +6,8 @@ const secureMiddleware = require('../middleware/secure.middleware');
 const userAccessMiddleware = require('../middleware/user-access.middleware');
 
 /* GET Chats listing. */
-// router.get('/:idUser/chats', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.index);
+// router.get('/:idUser/chats', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.show);
+router.get('/:idUser/chats', chatsController.show);
 
 // router.post('/:idUser/chats', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.create);
 router.post('/:idUser/chats', chatsController.create);

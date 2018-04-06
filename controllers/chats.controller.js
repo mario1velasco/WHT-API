@@ -34,6 +34,20 @@ module.exports.create = (req, res, next) => {
     .catch(error => next(error));
 }
 
+module.exports.show = (req, res, next) => {
+  const {
+    idUser
+  } = req.params;
+  Chat.find({createdBy:idUser})
+    .then(chats => {
+      if (chats) {
+        res.json(chats)
+      } else {
+        next(new ApiError(`Chat not found`, 404));
+      }
+    }).catch(error => next(error));
+}
+
 // module.exports.get = (req, res, next) => {
 //   const id = req.params.id;
 //   Chat.findById(id)

@@ -9,6 +9,4 @@ router.get('/:id', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAcc
 router.post('/', usersController.create);
 // router.put('/:id', usersController.edit);
 router.put('/:id', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, usersController.edit);
-router.get('/:id/chats', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, usersController.get);
-
 module.exports = router;
