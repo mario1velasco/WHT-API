@@ -39,10 +39,6 @@ module.exports.show = (req, res, next) => {
   const {
     idUser
   } = req.params;
-  console.log(`ID = ${idUser}`);
-  console.log(`ID = ${idUser}`);
-  console.log(`ID = ${idUser}`);
-  
   Chat.distinct('groupName', {users:idUser})
   .then(chats => {
     if (chats) {
