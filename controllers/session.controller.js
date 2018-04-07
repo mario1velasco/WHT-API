@@ -6,7 +6,7 @@ module.exports.create = (req, res, next) => {
   const password = req.body.password;
 
   if (!email || !password) {
-    next(new ApiError('Email and password are required', 400));
+    next(new ApiError('Email, password are required', 400));
   } else {
     passport.authenticate('local-auth', (err, user, message) => {
       if (err) {

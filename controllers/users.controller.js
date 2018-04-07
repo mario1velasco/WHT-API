@@ -10,7 +10,8 @@ module.exports.create = (req, res, next) => {
       } else {
         user = new User({
           email: req.body.email,
-          password: req.body.password
+          password: req.body.password,
+          username: req.body.username
         });
         user
           .save()
@@ -43,7 +44,6 @@ module.exports.get = (req, res, next) => {
 
 module.exports.edit = (req, res, next) => {
   const id = req.params.id;
-  console.log(req.user);
   
   User.findByIdAndUpdate(id, { $set: req.body }, { new: true })
     .then(user => {

@@ -3,6 +3,8 @@ const Chat = require('../models/chat.model');
 const ApiError = require('../models/api-error.model');
 
 module.exports.create = (req, res, next) => {
+  console.log(req.session);
+  
   const {
     idUser
   } = req.params;
@@ -16,7 +18,12 @@ module.exports.create = (req, res, next) => {
         chat = new Chat({
           groupName: req.body.groupName,
           createdBy: idUser,
-          users:[idUser]
+          originalLanguage: req.body.originalLanguage,
+          language: req.body.language,
+          users:[idUser],
+          time: req.body.time,
+          originalText: "HERE IS THE BEGGINING",
+          text: "HERE IS THE BEGGINING"
         });
         chat
           .save()
@@ -42,6 +49,7 @@ module.exports.show = (req, res, next) => {
   Chat.distinct('groupName', {users:idUser})
   .then(chats => {
     if (chats) {
+      console.log(chats);
       
       res.json(chats)
     } else {
