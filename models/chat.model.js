@@ -3,10 +3,10 @@ const Schema = mongoose.Schema;
 const LANGUAGES_CATEGORIES = require('./chat-languages-categories');
 
 const chatSchema = new mongoose.Schema({
-  room: {
+  groupName: {
     type: String,
     unique: true,
-    required: [true, 'Room is required']
+    required: [true, 'Group name is required']
   },
   users: {
     type: [{
@@ -20,7 +20,7 @@ const chatSchema = new mongoose.Schema({
     required: [true, 'Creator is required'],
     ref: 'User'
   },
-  original_language: {
+  originalLanguage: {
     type: String,
     enum: LANGUAGES_CATEGORIES,
     required: [true, 'Original language is required'],
@@ -32,7 +32,7 @@ const chatSchema = new mongoose.Schema({
     required: [true, 'Language is required'],
     default: "en"
   },
-  original_text: {
+  originalText: {
     type: String
   },  
   text: {

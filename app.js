@@ -10,6 +10,8 @@ const session = require('express-session');
 const passport = require('passport');
 const mongoose = require('mongoose');
 
+// const server = require('http').Server(app);
+
 require('./config/db.config');
 require('./config/passport.config').setup(passport);
 
@@ -19,6 +21,9 @@ const sessionRoutes = require('./routes/session.routes');
 const chatsRoutes = require('./routes/chat.routes');
 
 var app = express();
+
+// require('./config/socket')();
+// require('./config/socket').iosocket(require('http').Server(app));
 
 app.use(cors(corsConfig))
 //Permito el paso de todo
@@ -81,5 +86,11 @@ app.use(function(err, req, res, next) {
     errors:err.errors
   });
 });
+
+
+    // "start": "node ./bin/www",
+// server.listen(3000, function () {
+//   console.log("Servidor corriendo en http://localhost:3000");
+// });
 
 module.exports = app;

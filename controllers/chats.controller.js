@@ -7,15 +7,16 @@ module.exports.create = (req, res, next) => {
     idUser
   } = req.params;
   Chat.findOne({
-      room: req.body.room
+    groupName: req.body.groupName
     })
     .then(chat => {
       if (chat != null) {
-        next(new ApiError('Chat with that room name already registered', 400));
+        next(new ApiError('Chat with that group name already registered', 400));
       } else {
         chat = new Chat({
-          room: req.body.room,
-          createdBy: idUser
+          groupName: req.body.groupName,
+          createdBy: idUser,
+          users:[idUser]
         });
         chat
           .save()
@@ -38,15 +39,35 @@ module.exports.show = (req, res, next) => {
   const {
     idUser
   } = req.params;
-  Chat.find({createdBy:idUser})
-    .then(chats => {
-      if (chats) {
-        res.json(chats)
-      } else {
-        next(new ApiError(`Chat not found`, 404));
-      }
-    }).catch(error => next(error));
+  console.log(`ID = ${idUser}`);
+  console.log(`ID = ${idUser}`);
+  console.log(`ID = ${idUser}`);
+  
+  Chat.distinct('groupName', {users:idUser})
+  .then(chats => {
+    if (chats) {
+      
+      res.json(chats)
+    } else {
+      next(new ApiError(`Chat not found`, 404));
+    }
+  }).catch(error => next(error));
 }
+
+
+// module.exports.show = (req, res, next) => {
+//   const {
+//     idUser
+//   } = req.params;
+//   Chat.find({users:idUser})
+//     .then(chats => {
+//       if (chats) {
+//         res.json(chats)
+//       } else {
+//         next(new ApiError(`Chat not found`, 404));
+//       }
+//     }).catch(error => next(error));
+// }
 
 // module.exports.get = (req, res, next) => {
 //   const id = req.params.id;
