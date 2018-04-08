@@ -30,6 +30,17 @@ module.exports.create = (req, res, next) => {
     .catch(error => next(error));
 }
 
+module.exports.show = (req, res, next) => {
+  User.find()
+    .then(users => {
+      if (users) {
+        res.json(users)
+      } else {
+        next(new ApiError(`Users not found`, 404));
+      }
+    }).catch(error => next(error));
+}
+
 module.exports.get = (req, res, next) => {
   const id = req.params.id;
   User.findById(id)

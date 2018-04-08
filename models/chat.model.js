@@ -13,6 +13,7 @@ const chatSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }],
+    unique: true,
     default: []
   },
   createdBy: {
@@ -40,6 +41,10 @@ const chatSchema = new mongoose.Schema({
   },
   time: {
     type: String
+  },
+  messageHistory: {
+    type: Array,
+    default: []
   }
 }, {
   timestamps: true,

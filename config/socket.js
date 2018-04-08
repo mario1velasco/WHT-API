@@ -1,4 +1,5 @@
-// const Chat = require('../models/chat.model');
+const mongoose = require('mongoose');
+const Chat = require('../models/chat.model');
 
 // module.exports = function () {
 module.exports.iosocket = (server) => {
@@ -19,23 +20,20 @@ module.exports.iosocket = (server) => {
     // SOCKEt.id=username      
     console.log(`Connected ${socket.id} on instance`);
 
-    socket.on('join', room => {
-      socket.room = room
+    socket.on('join', (room, user) => {
+      //ESTO NO FUNCIONA
+      // socket.id = user.username;
+      //ESTO NO FUNCIONA
+      socket.room = room;
       console.log(`JOIN SOCKET ${socket.id}`);
-      newRoom(room, socket.id);
-      // addUser(socket.id, room);
-      // created_by = created_by || socket.id;
-      // chat.created_by=chat.created_by || socket.id;
-      // console.log(`NEW ROOM CREATED BY = ${chat.created_by}`);
+      newRoom(room, user.username);
 
       socket.join(room, () => {
-        // chat.room = chat.room || socket.room;
         console.log('Rooms: ', socket.rooms)
-        console.log('Room: ', socket.room)
+        console.log('Add to the room: ', socket.room)
       })
     })
 
-    //Esto hay q rehacerlo
     //HACER DE NUEVO
     // if (allMessages.length > 0) {
     //   socket.emit('previousComments', allMessages);
@@ -43,28 +41,56 @@ module.exports.iosocket = (server) => {
 
     socket.on('addComment', message => {
       // console.log(Object.keys(io.sockets.sockets));
-      let pos = findChatPosition(socket.room)
       console.log(`Message ==`);
       console.log(message);
-      console.log(`Position == ${pos}`);
 
-      chats[pos].messageHistory.push(message)
-      console.log(chats[pos]);
+      
 
       translate({
-        text: 'hola me llamo mario',
+        text: 'me llamo mario',
         source: 'es',
         target: 'en'
-      }, function (result) {
-        console.log(result);
+      }, (result) => {
+        console.log('TRADUCCION = ');
+        console.log(result.translation);
+        console.log('GROUPNAME = ');
+        console.log(message.groupName);
+
+        Chat.find({
+            groupName: message.groupName
+          })
+          .then(chat => {
+            console.log(chat);
+            
+            if (chat) {
+              chat[0].messageHistory.push(message);
+              console.log(chat[0]);
+              chat[0].save()
+                .then(() => {
+                  console.log("SAVE OK");
+                  console.log("SAVE OK");
+                  console.log("SAVE OK");
+                  
+                  // res.status(200).json(chat);
+                })
+                .catch(error => {
+                  if (error instanceof mongoose.Error.ValidationError) {
+                    next(new ApiError(error.errors, 400));
+                  } else {
+                    next(error);
+                  }
+                });
+            } else {
+              next(new ApiError(`User not found`, 404));
+            }
+          }).catch(error => next(error));
+
+        let response = []
+        response.push(message);
+        // socket.broadcast.to(socket.room).emit('comment:added', message)
+        io.sockets.to(socket.room).emit('comment:added', response)
       });
-
-      let response = []
-      response.push(message);
-      // socket.broadcast.to(socket.room).emit('comment:added', message)
-      io.sockets.to(socket.room).emit('comment:added', response)
     })
-
 
     socket.on('disconnect', function () {
       console.log("DISCONNECT");
@@ -73,7 +99,9 @@ module.exports.iosocket = (server) => {
 
   })
 
-  
+  // function saveMessageDDBB()
+
+
   function findChatPosition(room) {
     let position = 0;
     chats.forEach(chat => {
@@ -85,7 +113,7 @@ module.exports.iosocket = (server) => {
     console.log(`Postion = ${position}`);
     return position;
   }
-  
+
   function newRoom(room, socketId) {
     let exists = false;
     console.log("room = " + room);
@@ -94,7 +122,7 @@ module.exports.iosocket = (server) => {
       console.log(`Chat room = ${chat.room}`);
       console.log(`Room = ${room}`);
       console.log(`Position ${position}`);
-  
+
       if (String(room) === String(chat.room)) {
         exists = true;
         console.log(`Exist = ${exists}`);
@@ -102,9 +130,9 @@ module.exports.iosocket = (server) => {
       }
       position++;
     });
-  
+
     if (!exists) {
-  
+
       let newChat = {};
       newChat.room = room;
       newChat.created_by = socketId;
@@ -114,18 +142,18 @@ module.exports.iosocket = (server) => {
       chats.push(newChat)
       console.log("New Chat");
       console.log(newChat);
-  
+
     } else {
       console.log("Add USER");
       addUser(socketId, position)
     }
   }
-  
+
   function addUser(userId, position) {
     let exists = false;
     console.log("userID = " + userId);
     console.log("Position = " + position);
-  
+
     chats[Number(position)].users.forEach(user => {
       if (String(user) === String(userId)) {
         exists = true;
