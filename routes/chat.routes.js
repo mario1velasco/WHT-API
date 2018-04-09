@@ -8,7 +8,11 @@ const userAccessMiddleware = require('../middleware/user-access.middleware');
 /* GET Chats listing. */
 // router.get('/:idUser/chats', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.show);
 router.get('/:idUser/chats', chatsController.show);
-router.get('/:idUser/showallchats', chatsController.showId);
+
+// router.get('/:idUser/chatsName', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.show);
+router.get('/:idUser/chats/:groupName', chatsController.get);
+
+router.get('/:idUser/showallchats', chatsController.showAll);
 
 // router.post('/:idUser/chats', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.create);
 router.post('/:idUser/chats', chatsController.create);

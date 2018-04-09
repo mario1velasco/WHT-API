@@ -21,26 +21,17 @@ const chatSchema = new mongoose.Schema({
     required: [true, 'Creator is required'],
     ref: 'User'
   },
-  originalLanguage: {
+  firstLanguage: {
     type: String,
     enum: LANGUAGES_CATEGORIES,
     required: [true, 'Original language is required'],
     default: "en"
   },
-  language: {
+  secondLanguage: {
     type: String,
     enum: LANGUAGES_CATEGORIES,
     required: [true, 'Language is required'],
     default: "en"
-  },
-  originalText: {
-    type: String
-  },  
-  text: {
-    type: String
-  },
-  time: {
-    type: String
   },
   messageHistory: {
     type: Array,

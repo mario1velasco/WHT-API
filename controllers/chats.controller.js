@@ -18,12 +18,9 @@ module.exports.create = (req, res, next) => {
         chat = new Chat({
           groupName: req.body.groupName,
           createdBy: idUser,
-          originalLanguage: req.body.originalLanguage,
-          language: req.body.language,
-          users: [idUser],
-          time: req.body.time,
-          originalText: "HERE IS THE BEGGINING",
-          text: "HERE IS THE BEGGINING"
+          firstLanguage: req.body.firstLanguage,
+          secondLanguage: req.body.secondLanguage,
+          users: [idUser]
         });
         chat
           .save()
@@ -42,24 +39,11 @@ module.exports.create = (req, res, next) => {
     .catch(error => next(error));
 }
 
-module.exports.showId = (req, res, next) => {
-  Chat.find()
-    .then(chats => {
-      if (chats) {
-        console.log(chats);
-
-        res.json(chats)
-      } else {
-        next(new ApiError(`Chat not found`, 404));
-      }
-    }).catch(error => next(error));
-}
-
 module.exports.show = (req, res, next) => {
   const {
     idUser
   } = req.params;
-  Chat.distinct('groupName', {
+  Chat.find({
       users: idUser
     })
     .then(chats => {
@@ -73,33 +57,67 @@ module.exports.show = (req, res, next) => {
     }).catch(error => next(error));
 }
 
+module.exports.get = (req, res, next) => {
+  const {
+    groupName
+  } = req.params;
+  Chat.find({
+      groupName: groupName
+    })
+    .then(chat => {
+      if (chat) {
+        console.log(chat);
+
+        res.json(chat)
+      } else {
+        next(new ApiError(`Chat not found`, 404));
+      }
+    }).catch(error => next(error));
+}
+module.exports.showAll = (req, res, next) => {
+  Chat.find()
+    .then(chats => {
+      if (chats) {
+        console.log(chats);
+
+        res.json(chats)
+      } else {
+        next(new ApiError(`Chat not found`, 404));
+      }
+    }).catch(error => next(error));
+}
+
+
+
 module.exports.addUser = (req, res, next) => {
   const {
     idUser
   } = req.params;
   const {
     groupName,
-    userToAdd
+    userToAdd,
+    secondLanguage
   } = req.body;
   console.log(userToAdd);
 
   Chat.update({
-    groupName: groupName
-  }, {
-    $addToSet: {
-      users: userToAdd
-    }
-  })
-  .then((chat) => {
-    res.status(200).json(chat);
-  })
-  .catch(error => {
-    if (error instanceof mongoose.Error.ValidationError) {
-      next(new ApiError(error.errors, 400));
-    } else {
-      next(error);
-    }
-  });
+      groupName: groupName
+    }, {
+      $addToSet: {
+        users: userToAdd
+      },
+      secondLanguage
+    })
+    .then((chat) => {
+      res.status(200).json(chat);
+    })
+    .catch(error => {
+      if (error instanceof mongoose.Error.ValidationError) {
+        next(new ApiError(error.errors, 400));
+      } else {
+        next(error);
+      }
+    });
 
 
 
