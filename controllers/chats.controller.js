@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const Chat = require('../models/chat.model');
 const ApiError = require('../models/api-error.model');
 
+// const MONGODB_URI = process.env.MONGODB_URI;
+
 module.exports.create = (req, res, next) => {
   console.log(req.session);
 
@@ -15,16 +17,20 @@ module.exports.create = (req, res, next) => {
       if (chat != null) {
         next(new ApiError('Chat with that group name already registered', 400));
       } else {
+        let invitedUsername = randomPassword(30);
+        let address = 'http://localhost:4200/chats/' + req.body.groupName + '/' + invitedUsername;
         chat = new Chat({
           groupName: req.body.groupName,
           createdBy: idUser,
           firstLanguage: req.body.firstLanguage,
           secondLanguage: req.body.secondLanguage,
-          users: [idUser]
+          users: [idUser],
+          invitedAddress: address,
+          invitedUsername: invitedUsername
         });
         chat
           .save()
-          .then(() => {
+          .then(() => {            
             res.status(200).json(chat);
           })
           .catch(error => {
@@ -37,6 +43,15 @@ module.exports.create = (req, res, next) => {
       }
     })
     .catch(error => next(error));
+}
+function randomPassword(length) {
+  var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP1234567890";
+  var pass = "";
+  for (var x = 0; x < length; x++) {
+      var i = Math.floor(Math.random() * chars.length);
+      pass += chars.charAt(i);
+  }
+  return pass;
 }
 
 module.exports.show = (req, res, next) => {
@@ -97,7 +112,7 @@ module.exports.addUser = (req, res, next) => {
     groupName,
     userToAdd,
     secondLanguage
-  } = req.body;
+  } = req.body;  
   console.log(userToAdd);
 
   Chat.update({
@@ -106,9 +121,14 @@ module.exports.addUser = (req, res, next) => {
       $addToSet: {
         users: userToAdd
       },
+      $set: {
+        isInvited: false
+      },
       secondLanguage
     })
     .then((chat) => {
+      console.log(chat);
+      
       res.status(200).json(chat);
     })
     .catch(error => {

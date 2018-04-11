@@ -13,7 +13,6 @@ const chatSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }],
-    unique: true,
     default: []
   },
   createdBy: {
@@ -36,6 +35,20 @@ const chatSchema = new mongoose.Schema({
   messageHistory: {
     type: Array,
     default: []
+  },
+  isInvited: {
+    type: Boolean,
+    default: true
+  }, 
+  invitedAddress: {
+    type: String,
+    unique: true,
+    required: [true, 'Invited address is required']
+  },
+  invitedUsername: {
+    type: String,
+    unique: true,
+    required: [true, 'Invited user name is required']
   }
 }, {
   timestamps: true,
@@ -49,6 +62,30 @@ const chatSchema = new mongoose.Schema({
     }
   }
 });
+
+// chatSchema.pre('update', function(next) {
+//   console.log('CHAT CHAT');
+//   // const chat = this;
+//   // console.log(chat);
+//   console.log(this);
+//   console.log('CHAT USRES');
+  
+//   if (this.users.length > 2) {
+//     return next();
+//   }else{
+//     var err = new Error('You cannot add more users');
+//     next(err);
+//   }
+// });
+function randomPassword(length) {
+  var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP1234567890";
+  var pass = "";
+  for (var x = 0; x < length; x++) {
+      var i = Math.floor(Math.random() * chars.length);
+      pass += chars.charAt(i);
+  }
+  return pass;
+}
 
 const Chat = mongoose.model('Chat', chatSchema);
 module.exports = Chat;
