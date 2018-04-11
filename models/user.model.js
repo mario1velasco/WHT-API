@@ -27,10 +27,6 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Username is required'],
     unique: true
   },
-  social: {
-    facebookId: String,
-    googleId: String
-  },
   name: {
     type: String
   },
@@ -38,6 +34,9 @@ const userSchema = new mongoose.Schema({
     type: String
   },
   telephone: {
+    type: String
+  },
+  about: {
     type: String
   },
   role: {
@@ -51,9 +50,6 @@ const userSchema = new mongoose.Schema({
       ref: 'User'
     }],
     default: []
-  },
-  about: {
-    type: String
   },
   language: {
     type: String,

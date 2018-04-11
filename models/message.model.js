@@ -15,7 +15,6 @@ const messageSchema = new mongoose.Schema({
   },
   groupName: {
     type: String,
-    unique: true,
     required: [true, 'Group name is required']
   },
   wasRead: {
