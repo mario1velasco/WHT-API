@@ -32,10 +32,10 @@ const chatSchema = new mongoose.Schema({
     required: [true, 'Language is required'],
     default: "en"
   },
-  messageHistory: {
-    type: Array,
-    default: []
-  },
+  // messageHistory: {
+  //   type: Array,
+  //   default: []
+  // },
   isInvited: {
     type: Boolean,
     default: true
