@@ -161,19 +161,20 @@ module.exports.leaveChat = (req, res, next) => {
     .catch(error => next(error));
 }
 
-// module.exports.deleteChat = (req, res, next) => {
-//   const {
-//     idUser
-//   } = req.params;
-//   Chat.find({users:idUser})
-//     .then(chats => {
-//       if (chats) {
-//         res.json(chats)
-//       } else {
-//         next(new ApiError(`Chat not found`, 404));
-//       }
-//     }).catch(error => next(error));
-// }
+module.exports.deleteChat = (req, res, next) => {
+  const {
+    groupName
+  } = req.params;
+  const id = req.params.id;
+  Chat.findOneAndRemove({groupName: groupName})
+    .then(chat => {
+      if (chat) {
+        res.status(204).json()
+      } else {
+        next(new ApiError(`Chat not found`, 404));
+      }
+    }).catch(error => next(error));
+}
 
 // module.exports.get = (req, res, next) => {
 //   const id = req.params.id;

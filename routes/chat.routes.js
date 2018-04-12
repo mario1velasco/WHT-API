@@ -20,8 +20,9 @@ router.post('/:idUser/chats', chatsController.create);
 // router.put('/:idUser/:groupName/adduser', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.create);
 router.put('/:idUser/chats/:groupName/addUser', chatsController.addUser);
 
-// router.get('/:idUser/chats/:id', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.show);
 router.put('/:idUser/chats/:groupName/leaveChat', chatsController.leaveChat);
+
+router.delete('/:idUser/chats/:groupName', chatsController.deleteChat);
 
 // router.put('/:idUser/chats/:id', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.update);
 
