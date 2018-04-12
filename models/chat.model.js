@@ -13,8 +13,28 @@ const chatSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }],
-    default: []
+    default: [],
+    validate: {
+      validator: function (v) {
+        console.log('AAAAAAAAAAAA');
+        console.log('BBBBBBBBBBBBB');
+        console.log(v);
+
+        if (v.length <= 2) {
+          return true;
+        }
+        return false;
+      },
+      message: 'You can not have more than 2 users'
+    }
   },
+  // users: {
+  //   type: [{
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: 'User'
+  //   }],
+  //   default: []
+  // },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     required: [true, 'Creator is required'],
@@ -39,7 +59,7 @@ const chatSchema = new mongoose.Schema({
   isInvited: {
     type: Boolean,
     default: true
-  }, 
+  },
   invitedAddress: {
     type: String,
     unique: true,
@@ -63,13 +83,22 @@ const chatSchema = new mongoose.Schema({
   }
 });
 
+// chatSchema.path('users').validate(function (value, done) {
+//   var self = this;
+//   console.log('AAAAAAAAAAAA');
+//   console.log('BBBBBBBBBBBBB');
+//   console.log('CCCCCCCCCCCCCC');
+//   console.log(self);
+// }, "This email already exists");
+
 // chatSchema.pre('update', function(next) {
 //   console.log('CHAT CHAT');
-//   // const chat = this;
+//   const chat = this;
 //   // console.log(chat);
+//   debugger;   
 //   console.log(this);
 //   console.log('CHAT USRES');
-  
+
 //   if (this.users.length > 2) {
 //     return next();
 //   }else{
@@ -81,8 +110,8 @@ function randomPassword(length) {
   var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP1234567890";
   var pass = "";
   for (var x = 0; x < length; x++) {
-      var i = Math.floor(Math.random() * chars.length);
-      pass += chars.charAt(i);
+    var i = Math.floor(Math.random() * chars.length);
+    pass += chars.charAt(i);
   }
   return pass;
 }

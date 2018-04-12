@@ -65,11 +65,6 @@ module.exports.edit = (req, res, next) => {
     })
     .then(user => {
       if (user) {
-        console.log('AAAAAAAAAA');
-        console.log(user.name);
-        console.log(user.familyname);
-        console.log(user.telephone);
-
         if (user.name && user.familyname && user.telephone) {
           user.role = 'SUPERUSER';
         } else {

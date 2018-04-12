@@ -116,6 +116,7 @@ module.exports.addUser = (req, res, next) => {
   } = req.body;
   console.log(userToAdd);
 
+//  TIENES QUE HACER UN FIND Y LUEGO UN SAVE
   Chat.update({
       groupName: groupName
     }, {
