@@ -36,7 +36,7 @@ module.exports.show = (req, res, next) => {
   User.find()
     .then(users => {
       if (users) {
-        res.status(200).json(user);
+        res.status(200).json(users);
       } else {
         next(new ApiError(`Users not found`, 404));
       }

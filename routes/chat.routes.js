@@ -17,10 +17,11 @@ router.get('/:idUser/showallchats', chatsController.showAll);
 // router.post('/:idUser/chats', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.create);
 router.post('/:idUser/chats', chatsController.create);
 
-// router.post('/:idUser/chats', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.create);
-router.put('/:idUser/chats/adduser', chatsController.addUser);
+// router.put('/:idUser/:groupName/adduser', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.create);
+router.put('/:idUser/chats/:groupName/addUser', chatsController.addUser);
 
 // router.get('/:idUser/chats/:id', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.show);
+router.put('/:idUser/chats/:groupName/leaveChat', chatsController.leaveChat);
 
 // router.put('/:idUser/chats/:id', secureMiddleware.isAuthenticated, userAccessMiddleware.gotAccess, chatsController.update);
 

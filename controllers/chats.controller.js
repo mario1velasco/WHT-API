@@ -30,7 +30,7 @@ module.exports.create = (req, res, next) => {
         });
         chat
           .save()
-          .then(() => {            
+          .then(() => {
             res.status(200).json(chat);
           })
           .catch(error => {
@@ -44,12 +44,13 @@ module.exports.create = (req, res, next) => {
     })
     .catch(error => next(error));
 }
+
 function randomPassword(length) {
   var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP1234567890";
   var pass = "";
   for (var x = 0; x < length; x++) {
-      var i = Math.floor(Math.random() * chars.length);
-      pass += chars.charAt(i);
+    var i = Math.floor(Math.random() * chars.length);
+    pass += chars.charAt(i);
   }
   return pass;
 }
@@ -112,7 +113,7 @@ module.exports.addUser = (req, res, next) => {
     groupName,
     userToAdd,
     secondLanguage
-  } = req.body;  
+  } = req.body;
   console.log(userToAdd);
 
   Chat.update({
@@ -128,7 +129,7 @@ module.exports.addUser = (req, res, next) => {
     })
     .then((chat) => {
       console.log(chat);
-      
+
       res.status(200).json(chat);
     })
     .catch(error => {
@@ -138,35 +139,29 @@ module.exports.addUser = (req, res, next) => {
         next(error);
       }
     });
-
-
-
-  // Chat.find({
-  //     groupName: groupName
-  //   })
-  //   .then(chat => {
-  //     if (chat) {
-  //       chat[0].users.push(userToAdd);
-  //       console.log(chat[0]);
-  //       chat[0].save()
-  //         .then(() => {
-  //           res.status(200).json(chat);
-  //         })
-  //         .catch(error => {
-  //           if (error instanceof mongoose.Error.ValidationError) {
-  //             next(new ApiError(error.errors, 400));
-  //           } else {
-  //             next(error);
-  //           }
-  //         });
-  //     } else {
-  //       next(new ApiError(`User not found`, 404));
-  //     }
-  //   }).catch(error => next(error));
 }
 
 
-// module.exports.show = (req, res, next) => {
+module.exports.leaveChat = (req, res, next) => {
+  const {
+    idUser,
+    groupName
+  } = req.params;
+  Chat.update({
+      groupName: groupName
+    }, {
+      $pullAll: {
+        users: [idUser]
+      }
+    }).then(chat => {
+      res.status(200).json({
+        message: "Leave chat correcty"
+      });
+    })
+    .catch(error => next(error));
+}
+
+// module.exports.deleteChat = (req, res, next) => {
 //   const {
 //     idUser
 //   } = req.params;
