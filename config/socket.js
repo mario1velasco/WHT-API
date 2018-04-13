@@ -16,17 +16,34 @@ module.exports.iosocket = (server) => {
         console.log('Rooms: ', socket.rooms);
         console.log('Add to the room: ', socket.room);
         if (user && (user.role === 'SUPERUSER')) {
+          console.log('SUPERUSER');
+          console.log('SUPERUSER');
+          console.log('SUPERUSER');
           Message.find({
               groupName: room
             })
             .then(messages => {
-              if (messages) {
-                // socket.emit('previousMessages', (chat[0].messageHistory));
-                socket.emit('previousMessages', messages);
-              } else {
-                socket.emit('previousMessages', 'There are not previous messages');
-              }
+              socket.emit('previousMessages', messages);
             }).catch(error => next(error));
+        } else if (user && (user.role === 'USER')) {
+          console.log('USER');
+          console.log('USER');
+          console.log('USER');
+
+          Message.find({
+              groupName: room,
+              wasRead: false,
+              createdBy: {$ne : user.id}
+            })
+            .then(messages => {
+              messages.forEach((message, index, object) => {
+                if (message.createdBy !== user.id) {
+                  message.wasRead = true;
+                  message.save();
+                }
+              });
+              socket.emit('previousMessages', messages);
+            }).catch(error => console.log(error));
         } else {
           let noMessage = {
             groupName: room,
@@ -48,7 +65,7 @@ module.exports.iosocket = (server) => {
       });
     })
 
-    socket.on('disconnect', function () {
+    socket.on('disconnect', () => {
       console.log(`DISCONNECT ${socket.id} on instance`);
     });
 
@@ -80,18 +97,16 @@ module.exports.iosocket = (server) => {
                 .then(() => {
                   console.log("SAVE MESSAGE OK");
                   let response = {
-                    message: message,
-                    chat: newMessage
+                    message: newMessage
                   };
+                  socket.broadcast.emit('notifymessage', response);
                   io.sockets.to(socket.room).emit('comment:added', response)
+                  // socket.emit('comment:added', response);
                 })
                 .catch(error => {
                   console.log(error);
-
                   io.sockets.to(socket.room).emit('comment:added', error)
                 });
-
-
             });
           } else {
             next(new ApiError(`User not found`, 404));
@@ -99,6 +114,14 @@ module.exports.iosocket = (server) => {
         }).catch(error => next(error));
 
     })
+
+    socket.on('messageRead', message => {
+      message.wasRead=true;
+      Message.findByIdAndUpdate(message.id, message)
+      .catch(error => console.log(error));
+    });
+
+
   })
 
 }
