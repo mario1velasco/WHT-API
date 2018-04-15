@@ -18,8 +18,7 @@ module.exports.get = (req, res, next) => {
     })
     .then(messages => {
       if (messages) {
-        console.log(messages);
-        res.json(messages)
+        (messages.length === 0) ? res.json({wasRead: true}) : res.json({wasRead: false});
       } else {
         next(new ApiError(`Message NOT found`, 404));
       }

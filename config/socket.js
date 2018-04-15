@@ -4,56 +4,70 @@ const Message = require('../models/message.model');
 
 // module.exports = function () {
 module.exports.iosocket = (server) => {
+  let noMessage = {
+    groupName: 'room',
+    chatCreatedBy: 'WHT? Group',
+    createdBy: 'WHT? Group',
+    firstLanguage: 'en',
+    firstText: 'Become Super User to read old messages',
+    secondLanguage: 'en',
+    secondText: 'Become Super User to read old messages'
+  };
   let translate = require('node-google-translate-skidz');
   const io = require('socket.io')(server);
   io.on('connection', (socket) => {
     console.log(`Connected ${socket.id} on instance`);
 
     socket.on('join', (room, user) => {
+      console.log('ROOMS ROOMS ROOMS: ', socket.rooms);
       socket.room = room;
       console.log(`JOIN SOCKET ${socket.id}`);
       socket.join(room, () => {
         console.log('Rooms: ', socket.rooms);
         console.log('Add to the room: ', socket.room);
+        console.log('ROOMS ROOMS ROOMS: ', socket.rooms);
         if (user && (user.role === 'SUPERUSER')) {
-          console.log('SUPERUSER');
-          console.log('SUPERUSER');
-          console.log('SUPERUSER');
           Message.find({
               groupName: room
             })
             .then(messages => {
               socket.emit('previousMessages', messages);
-            }).catch(error => next(error));
-        } else if (user && (user.role === 'USER')) {
-          console.log('USER');
-          console.log('USER');
-          console.log('USER');
-
-          Message.find({
-              groupName: room,
-              wasRead: false,
-              createdBy: {$ne : user.id}
-            })
-            .then(messages => {
               messages.forEach((message, index, object) => {
-                if (message.createdBy !== user.id) {
+                if ((message.createdBy !== user.id) && (!message.wasRead)) {
+                  console.log('SUPERUSER');
+                  console.log('SUPERUSER');
+                  console.log('SUPERUSER');
                   message.wasRead = true;
                   message.save();
                 }
               });
+            }).catch(error => next(error));
+        } else if (user && (user.role === 'USER')) {
+
+          Message.find({
+              groupName: room,
+              wasRead: false,
+              createdBy: {
+                $ne: user.id
+              }
+            })
+            .then(messages => {
+              messages.unshift(noMessage);
               socket.emit('previousMessages', messages);
+              messages.shift();
+              messages.forEach((message, index, object) => {
+                if (message.createdBy !== user.id) {
+                  debugger
+                  console.log('USER');
+                  console.log('USER');
+                  console.log('USER');
+                  console.log(message);
+                  message.wasRead = true;
+                  message.save();
+                }
+              });
             }).catch(error => console.log(error));
         } else {
-          let noMessage = {
-            groupName: room,
-            chatCreatedBy: user.id,
-            createdBy: user.id,
-            firstLanguage: 'en',
-            firstText: 'Become Super User to read old messages',
-            secondLanguage: 'en',
-            secondText: 'Become Super User to read old messages'
-          };
           socket.emit('previousMessages', noMessage);
         }
 
@@ -100,7 +114,7 @@ module.exports.iosocket = (server) => {
                     message: newMessage
                   };
                   socket.broadcast.emit('notifymessage', response);
-                  io.sockets.to(socket.room).emit('comment:added', response)
+                  io.sockets.to(socket.room).emit('comment:added', response);
                   // socket.emit('comment:added', response);
                 })
                 .catch(error => {
@@ -116,9 +130,9 @@ module.exports.iosocket = (server) => {
     })
 
     socket.on('messageRead', message => {
-      message.wasRead=true;
+      message.wasRead = true;
       Message.findByIdAndUpdate(message.id, message)
-      .catch(error => console.log(error));
+        .catch(error => console.log(error));
     });
 
 
