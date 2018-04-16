@@ -31,6 +31,10 @@ module.exports.iosocket = (server) => {
               groupName: room
             })
             .then(messages => {
+              console.log('SUPERUSER');
+              noMessage.firstText = 'This is the beggining of the chat';
+              noMessage.secondText = 'This is the beggining of the chat';
+              messages.unshift(noMessage);
               socket.emit('previousMessages', messages);
               messages.forEach((message, index, object) => {
                 if ((message.createdBy !== user.id) && (!message.wasRead)) {
@@ -43,7 +47,6 @@ module.exports.iosocket = (server) => {
               });
             }).catch(error => next(error));
         } else if (user && (user.role === 'USER')) {
-
           Message.find({
               groupName: room,
               wasRead: false,
@@ -52,6 +55,7 @@ module.exports.iosocket = (server) => {
               }
             })
             .then(messages => {
+              console.log('USER');
               messages.unshift(noMessage);
               socket.emit('previousMessages', messages);
               messages.shift();
@@ -135,8 +139,8 @@ module.exports.iosocket = (server) => {
       Message.findByIdAndUpdate(message.id, message)
         .catch(error => console.log(error));
     });
-    socket.on('updateChatList:SendFromClient', data => {
-      socket.broadcast.emit('updateChatList:SendFromServer', data);
+    socket.on('updateChatList:SendFromClient', data => {    
+      socket.emit('updateChatList:SendFromServer', data);
     });
 
 

@@ -120,7 +120,7 @@ module.exports.addUser = (req, res, next) => {
     if (chat[0].users.length < 2){
       chat[0].users.push(userToAdd);
       chat[0].secondLanguage = secondLanguage;
-      chat[0].isInvited = true;
+      chat[0].isInvited = false;
       chat[0].save();
       res.status(200).json(chat);
     } else {
