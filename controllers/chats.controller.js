@@ -114,33 +114,51 @@ module.exports.addUser = (req, res, next) => {
     userToAdd,
     secondLanguage
   } = req.body;
-  console.log(userToAdd);
-
-//  TIENES QUE HACER UN FIND Y LUEGO UN SAVE
-  Chat.update({
-      groupName: groupName
-    }, {
-      $addToSet: {
-        users: userToAdd
-      },
-      $set: {
-        isInvited: false
-      },
-      secondLanguage
-    })
-    .then((chat) => {
-      console.log(chat);
-
+  Chat.find({groupName: groupName})
+  .then((chat) => {
+    console.log(chat);
+    if (chat[0].users.length < 2){
+      chat[0].users.push(userToAdd);
+      chat[0].secondLanguage = secondLanguage;
+      chat[0].isInvited = true;
+      chat[0].save();
       res.status(200).json(chat);
-    })
-    .catch(error => {
-      if (error instanceof mongoose.Error.ValidationError) {
-        next(new ApiError(error.errors, 400));
-      } else {
-        next(error);
-      }
-    });
+    } else {
+      next(new ApiError(`You cannot add more users`, 412));
+    }
+  })
+  .catch(error => {
+    if (error instanceof mongoose.Error.ValidationError) {
+      next(new ApiError(error.errors, 400));
+    } else {
+      next(error);
+    }
+  });
+
 }
+    // Chat.update({
+    //     groupName: groupName
+    //   }, {
+    //     $addToSet: {
+    //       users: userToAdd
+    //     },
+    //     $set: {
+    //       isInvited: false
+    //     },
+    //     secondLanguage
+    //   })
+    //   .then((chat) => {
+    //     console.log(chat);
+  
+    //     res.status(200).json(chat);
+    //   })
+    //   .catch(error => {
+    //     if (error instanceof mongoose.Error.ValidationError) {
+    //       next(new ApiError(error.errors, 400));
+    //     } else {
+    //       next(error);
+    //     }
+    //   });
 
 
 module.exports.leaveChat = (req, res, next) => {

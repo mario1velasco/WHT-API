@@ -81,6 +81,7 @@ module.exports.iosocket = (server) => {
 
     socket.on('disconnect', () => {
       console.log(`DISCONNECT ${socket.id} on instance`);
+      socket.disconnect(true);
     });
 
     socket.on('addComment', message => {
@@ -133,6 +134,9 @@ module.exports.iosocket = (server) => {
       message.wasRead = true;
       Message.findByIdAndUpdate(message.id, message)
         .catch(error => console.log(error));
+    });
+    socket.on('updateChatList:SendFromClient', data => {
+      socket.broadcast.emit('updateChatList:SendFromServer', data);
     });
 
 

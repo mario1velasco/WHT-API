@@ -16,10 +16,6 @@ const chatSchema = new mongoose.Schema({
     default: [],
     validate: {
       validator: function (v) {
-        console.log('AAAAAAAAAAAA');
-        console.log('BBBBBBBBBBBBB');
-        console.log(v);
-
         if (v.length <= 2) {
           return true;
         }
