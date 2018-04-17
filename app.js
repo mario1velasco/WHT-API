@@ -26,7 +26,7 @@ var app = express();
 // require('./config/socket')();
 // require('./config/socket').iosocket(require('http').Server(app));
 
-app.use(cors(corsConfig))
+// app.use(cors(corsConfig))
 //Permito el paso de todo
 // app.use(cors())
 
