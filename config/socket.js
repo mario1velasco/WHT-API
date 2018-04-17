@@ -85,6 +85,8 @@ module.exports.iosocket = (server) => {
 
     socket.on('disconnect', () => {
       console.log(`DISCONNECT ${socket.id} on instance`);
+      // socket.removeAllListeners();
+      // io.removeAllListeners();
       socket.disconnect(true);
     });
 
@@ -140,6 +142,8 @@ module.exports.iosocket = (server) => {
         .catch(error => console.log(error));
     });
     socket.on('updateChatList:SendFromClient', data => {    
+      // io.of('nsp').emit('updateChatList:SendFromServer', data);
+      socket.broadcast.emit('updateChatList:SendFromServer', data);
       socket.emit('updateChatList:SendFromServer', data);
     });
 
