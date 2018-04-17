@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Chat = require('../models/chat.model');
+const Message = require('../models/message.model');
 const ApiError = require('../models/api-error.model');
 
 // const MONGODB_URI = process.env.MONGODB_URI;
@@ -114,52 +115,30 @@ module.exports.addUser = (req, res, next) => {
     userToAdd,
     secondLanguage
   } = req.body;
-  Chat.find({groupName: groupName})
-  .then((chat) => {
-    console.log(chat);
-    if (chat[0].users.length < 2){
-      chat[0].users.push(userToAdd);
-      chat[0].secondLanguage = secondLanguage;
-      chat[0].isInvited = false;
-      chat[0].save();
-      res.status(200).json(chat);
-    } else {
-      next(new ApiError(`You cannot add more users`, 412));
-    }
-  })
-  .catch(error => {
-    if (error instanceof mongoose.Error.ValidationError) {
-      next(new ApiError(error.errors, 400));
-    } else {
-      next(error);
-    }
-  });
+  Chat.find({
+      groupName: groupName
+    })
+    .then((chat) => {
+      console.log(chat);
+      if (chat[0].users.length < 2) {
+        chat[0].users.push(userToAdd);
+        chat[0].secondLanguage = secondLanguage;
+        chat[0].isInvited = false;
+        chat[0].save();
+        res.status(200).json(chat);
+      } else {
+        next(new ApiError(`You cannot add more users`, 412));
+      }
+    })
+    .catch(error => {
+      if (error instanceof mongoose.Error.ValidationError) {
+        next(new ApiError(error.errors, 400));
+      } else {
+        next(error);
+      }
+    });
 
 }
-    // Chat.update({
-    //     groupName: groupName
-    //   }, {
-    //     $addToSet: {
-    //       users: userToAdd
-    //     },
-    //     $set: {
-    //       isInvited: false
-    //     },
-    //     secondLanguage
-    //   })
-    //   .then((chat) => {
-    //     console.log(chat);
-  
-    //     res.status(200).json(chat);
-    //   })
-    //   .catch(error => {
-    //     if (error instanceof mongoose.Error.ValidationError) {
-    //       next(new ApiError(error.errors, 400));
-    //     } else {
-    //       next(error);
-    //     }
-    //   });
-
 
 module.exports.leaveChat = (req, res, next) => {
   const {
@@ -185,44 +164,23 @@ module.exports.deleteChat = (req, res, next) => {
     groupName
   } = req.params;
   const id = req.params.id;
-  Chat.findOneAndRemove({groupName: groupName})
-    .then(chat => {
-      if (chat) {
-        res.status(204).json()
+  Chat.findOneAndRemove({
+      groupName: groupName
+    })
+    .then(ok => {
+      if (ok) {
+        Message.deleteMany({
+            groupName: groupName
+          })
+          .then(ok => {
+            if (ok) {
+              res.status(204).json();
+            } else {
+              next(new ApiError(`Messages not found`, 404));
+            }
+          }).catch(error => next(error));
       } else {
         next(new ApiError(`Chat not found`, 404));
       }
     }).catch(error => next(error));
 }
-
-// module.exports.get = (req, res, next) => {
-//   const id = req.params.id;
-//   Chat.findById(id)
-//     .then(chat => {
-//       if (chat) {
-//         res.json(chat)
-//       } else {
-//         next(new ApiError(`Chat not found`, 404));
-//       }
-//     }).catch(error => next(error));
-// }
-
-// module.exports.edit = (req, res, next) => {
-//   const id = req.params.id;
-//   console.log(req.chat);
-
-//   Chat.findByIdAndUpdate(id, { $set: req.body }, { new: true })
-//     .then(chat => {
-//       if (chat) {
-//         res.json(chat)
-//       } else {
-//         next(new ApiError(`Chat not found`, 404));
-//       }
-//     }).catch(error => {
-//       if (error instanceof mongoose.Error.ValidationError) {
-//         next(new ApiError(error.message, 400, error.errors));
-//       } else {
-//         next(new ApiError(error.message, 500));
-//       }
-//     });
-// }

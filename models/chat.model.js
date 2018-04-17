@@ -24,13 +24,6 @@ const chatSchema = new mongoose.Schema({
       message: 'You can not have more than 2 users'
     }
   },
-  // users: {
-  //   type: [{
-  //     type: mongoose.Schema.Types.ObjectId,
-  //     ref: 'User'
-  //   }],
-  //   default: []
-  // },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     required: [true, 'Creator is required'],
@@ -48,10 +41,6 @@ const chatSchema = new mongoose.Schema({
     required: [true, 'Language is required'],
     default: "en"
   },
-  // messageHistory: {
-  //   type: Array,
-  //   default: []
-  // },
   isInvited: {
     type: Boolean,
     default: true
