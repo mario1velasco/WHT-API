@@ -1,7 +1,6 @@
 // Configuration options: https://www.npmjs.com/package/cors#configuration-options
 
-// const originsAllowed = process.env.CORS_ORIGINS || [
-const originsAllowed =  [
+const originsAllowed = process.env.CORS_ORIGINS || [
   'http://localhost:4200',
   'http://localhost:3000',
   'https://wht-api.herokuapp.com/',
