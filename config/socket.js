@@ -141,10 +141,17 @@ module.exports.iosocket = (server) => {
       Message.findByIdAndUpdate(message.id, message)
         .catch(error => console.log(error));
     });
+
     socket.on('updateChatList:SendFromClient', data => {    
       // io.of('nsp').emit('updateChatList:SendFromServer', data);
       socket.broadcast.emit('updateChatList:SendFromServer', data);
       socket.emit('updateChatList:SendFromServer', data);
+    });
+
+    socket.on('notifyDeleteChat:SendFromClient', data => {    
+      // io.of('nsp').emit('updateChatList:SendFromServer', data);
+      socket.broadcast.emit('notifyDeleteChat:SendFromServer', data);
+      // socket.emit('updateChatList:SendFromServer', data);
     });
 
 
