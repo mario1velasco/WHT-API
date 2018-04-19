@@ -17,6 +17,10 @@ module.exports.iosocket = (server) => {
   const io = require('socket.io')(server);
   io.on('connection', (socket) => {
     console.log(`Connected ${socket.id} on instance`);
+    console.log('ROOMS ROOMS ROOMS: ', socket.rooms);
+    
+    
+
 
     socket.on('join', (room, user) => {
       console.log('ROOMS ROOMS ROOMS: ', socket.rooms);
@@ -32,9 +36,12 @@ module.exports.iosocket = (server) => {
             })
             .then(messages => {
               console.log('SUPERUSER');
+
+              //IF NO MESSAGES
               noMessage.firstText = 'This is the beggining of the chat';
               noMessage.secondText = 'This is the beggining of the chat';
               messages.unshift(noMessage);
+
               socket.emit('previousMessages', messages);
               messages.forEach((message, index, object) => {
                 if ((message.createdBy !== user.id) && (!message.wasRead)) {
@@ -42,7 +49,8 @@ module.exports.iosocket = (server) => {
                   console.log('SUPERUSER');
                   console.log('SUPERUSER');
                   message.wasRead = true;
-                  message.save();
+                  message.save().then(() => {})
+                    .catch(error => next(error));
                 }
               });
             }).catch(error => next(error));
@@ -77,6 +85,22 @@ module.exports.iosocket = (server) => {
 
       })
     })
+
+    socket.on('leaveALLrooms', () => {
+      if(socket.rooms !== {}){
+        console.log("LEAVING ALL ROOMS ROOMS");
+        let val = Object.keys(socket.rooms);
+        console.log(val);   
+        val.forEach(element => {
+          socket.leave(element, () => {
+            console.log(`User has LEAVE the chatGroup named ${element}`);
+          });
+        });   
+      }
+      console.log('ROOMS ROOMS ROOMS: ', socket.rooms);
+
+    });
+
     socket.on('leave room', (room) => {
       socket.leave(room, () => {
         console.log(`User has LEAVE the chatGroup named ${room}`);
@@ -121,7 +145,11 @@ module.exports.iosocket = (server) => {
                     message: newMessage
                   };
                   socket.broadcast.emit('notifymessage', response);
+                  console.log(socket)
+                  debugger
                   io.sockets.to(socket.room).emit('comment:added', response);
+                  // socket.broadcast.emit('comment:added', response);
+                  // socket.emit('comment:added', response);
                   // socket.emit('comment:added', response);
                 })
                 .catch(error => {
