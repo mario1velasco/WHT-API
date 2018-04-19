@@ -5,13 +5,14 @@ const Message = require('../models/message.model');
 // module.exports = function () {
 module.exports.iosocket = (server) => {
   let noMessage = {
-    groupName: 'room',
-    chatCreatedBy: 'WHT? Group',
-    createdBy: 'WHT? Group',
+    wasRead: false,
     firstLanguage: 'en',
-    firstText: 'Become Super User to read old messages',
     secondLanguage: 'en',
-    secondText: 'Become Super User to read old messages'
+    chatCreatedBy: 'WHT? Group',
+    groupName: 'room',
+    createdBy: 'WHT? Group',
+    firstText: 'Become Super User to read old messages',
+    secondText: 'Become Super User to read old messages',
   };
   let translate = require('node-google-translate-skidz');
   const io = require('socket.io')(server);
@@ -41,16 +42,15 @@ module.exports.iosocket = (server) => {
               noMessage.firstText = 'This is the beggining of the chat';
               noMessage.secondText = 'This is the beggining of the chat';
               messages.unshift(noMessage);
-
               socket.emit('previousMessages', messages);
+              messages.shift();
               messages.forEach((message, index, object) => {
                 if ((message.createdBy !== user.id) && (!message.wasRead)) {
                   console.log('SUPERUSER');
                   console.log('SUPERUSER');
                   console.log('SUPERUSER');
                   message.wasRead = true;
-                  message.save().then(() => {})
-                    .catch(error => next(error));
+                  message.save();
                 }
               });
             }).catch(error => next(error));
@@ -145,7 +145,9 @@ module.exports.iosocket = (server) => {
                     message: newMessage
                   };
                   socket.broadcast.emit('notifymessage', response);
-                  console.log(socket)
+                  // console.log(io.sockets.adapter.rooms['number1'].sockets)
+                  console.log("ADAPTER ROOMS ROOMS")
+                  console.log(io.sockets.adapter.rooms)
                   debugger
                   io.sockets.to(socket.room).emit('comment:added', response);
                   // socket.broadcast.emit('comment:added', response);
