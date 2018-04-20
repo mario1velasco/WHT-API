@@ -57,7 +57,52 @@ module.exports.iosocket = (server) => {
       })
     })
 
+    function getMessages(room, user, chat, sndUser) {
+      if (user && (user.role === 'SUPERUSER')) {
+        Message.find({
+            groupName: room
+          })
+          .sort({createdAt: 'asc'})
+          .then(messages => {
+            emmitAndSaveMessages(room, user, messages, chat, sndUser);
 
+          }).catch(error => next(error));
+      } else if (user && (user.role === 'USER')) {
+        Message.find({
+            groupName: room,
+            wasRead: false,
+            createdBy: {
+              $ne: user.id
+            }
+          }).sort({createdAt: 'asc'})
+          .then(messages => {
+            emmitAndSaveMessages(room, user, messages, chat, sndUser);
+
+          }).catch(error => console.log(error));
+      } else {
+        socket.emit('previousMessages', noMessage, chat, sndUser);
+      }
+    }
+
+    function emmitAndSaveMessages(room, user, messages, chat, sndUser) {
+      console.log(user.role);
+      if (user.role === "SUPERUSER" || messages.length === 0) {
+        noMessage.firstText = 'This is the beggining of the chat';
+        noMessage.secondText = 'This is the beggining of the chat';
+      }
+      messages.unshift(noMessage);
+      socket.emit('previousMessages', messages, chat, sndUser);
+      console.log(user.role);
+      messages.shift();
+
+      messages.forEach((message, index, object) => {
+        if (((user.role === 'SUPERUSER') && (message.createdBy !== user.id) && (!message.wasRead)) ||
+          (((user.role === 'USER') && (message.createdBy !== user.id)))) {
+          message.wasRead = true;
+          message.save();
+        }
+      });
+    }
 
     socket.on('leaveALLrooms', () => {
       if (socket.rooms !== {}) {
@@ -97,9 +142,13 @@ module.exports.iosocket = (server) => {
         })
         .then(chat => {
           if (chat) {
+            console.log("AAAAAAAAAA");
+            console.log(chat);
             if (message.isInvited) {
               chat[0].secondLanguage = message.firstLanguage;
-              chat[0].save();
+              chat.forEach(cht => {
+                cht.save();                
+              });
             }
             translate({
               text: message.firstText,
@@ -118,9 +167,6 @@ module.exports.iosocket = (server) => {
                     message: newMessage
                   };
                   socket.broadcast.emit('notifymessage', response);
-                  // console.log(io.sockets.adapter.rooms['number1'].sockets)
-                  console.log("ADAPTER ROOMS ROOMS")
-                  console.log(io.sockets.adapter.rooms)
                   io.sockets.to(socket.room).emit('comment:added', response);
                   // socket.broadcast.emit('comment:added', response);
                   // socket.emit('comment:added', response);
@@ -137,6 +183,7 @@ module.exports.iosocket = (server) => {
         }).catch(error => next(error));
 
     })
+
 
     socket.on('messageRead', message => {
       message.wasRead = true;
@@ -156,51 +203,7 @@ module.exports.iosocket = (server) => {
       // socket.emit('updateChatList:SendFromServer', data);
     });
 
-    function getMessages(room, user, chat, sndUser) {
-      if (user && (user.role === 'SUPERUSER')) {
-        Message.find({
-            groupName: room
-          })
-          .then(messages => {
-            emmitAndSaveMessages(room, user, messages, chat, sndUser);
 
-          }).catch(error => next(error));
-      } else if (user && (user.role === 'USER')) {
-        Message.find({
-            groupName: room,
-            wasRead: false,
-            createdBy: {
-              $ne: user.id
-            }
-          })
-          .then(messages => {
-            emmitAndSaveMessages(room, user, messages, chat, sndUser);
-
-          }).catch(error => console.log(error));
-      } else {
-        socket.emit('previousMessages', noMessage, chat, sndUser);
-      }
-    }
-
-    function emmitAndSaveMessages(room, user, messages, chat, sndUser) {
-      console.log(user.role);
-      if (user.role === "SUPERUSER" || messages.length === 0) {
-        noMessage.firstText = 'This is the beggining of the chat';
-        noMessage.secondText = 'This is the beggining of the chat';
-      }
-      messages.unshift(noMessage);
-      socket.emit('previousMessages', messages, chat, sndUser);
-      console.log(user.role);
-      messages.shift();
-
-      messages.forEach((message, index, object) => {
-        if (((user.role === 'SUPERUSER') && (message.createdBy !== user.id) && (!message.wasRead)) ||
-          (((user.role === 'USER') && (message.createdBy !== user.id)))) {
-          message.wasRead = true;
-          message.save();
-        }
-      });
-    }
   })
 
 }
