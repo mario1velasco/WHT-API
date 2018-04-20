@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Chat = require('../models/chat.model');
+const User = require('../models/user.model');
 const Message = require('../models/message.model');
 
 // module.exports = function () {
@@ -20,9 +21,6 @@ module.exports.iosocket = (server) => {
     console.log(`Connected ${socket.id} on instance`);
     console.log('ROOMS ROOMS ROOMS: ', socket.rooms);
 
-
-
-
     socket.on('join', (room, user) => {
       console.log('ROOMS ROOMS ROOMS: ', socket.rooms);
       socket.room = room;
@@ -35,80 +33,31 @@ module.exports.iosocket = (server) => {
             groupName: room
           })
           .then(chat => {
+            console.log('QQQQQQQQ');
+            console.log(chat[0].users);
             if (chat) {
-              // for (const usr of chat.users) {
-              //   if (usr !== user.id) {
-              //     User.findById()
-              //   }else{
-
-              //   }
-              // }
-              if (user && (user.role === 'SUPERUSER')) {
-                Message.find({
-                    groupName: room
-                  })
-                  .then(messages => {
-                    getMessages(room, user, messages, chat);
-
-                  }).catch(error => next(error));
-              } else if (user && (user.role === 'USER')) {
-                Message.find({
-                    groupName: room,
-                    wasRead: false,
-                    createdBy: {
-                      $ne: user.id
-                    }
-                  })
-                  .then(messages => {
-                    getMessages(room, user, messages, chat);
-
-                    // console.log('USER');
-                    // messages.unshift(noMessage);
-                    // socket.emit('previousMessages', messages, chat);
-                    // messages.shift();
-                    // messages.forEach((message, index, object) => {
-                    //   if (message.createdBy !== user.id) {
-                    //     console.log('USER');
-                    //     console.log('USER');
-                    //     console.log('USER');
-                    //     console.log(message);
-                    //     message.wasRead = true;
-                    //     message.save();
-                    //   }
-                    // });
-                  }).catch(error => console.log(error));
+              if (chat[0].users.length <= 1) {
+                getMessages(room, user, chat, {});
               } else {
-                socket.emit('previousMessages', noMessage, chat);
+                chat[0].users.forEach(id => {
+                  if (id.toString() !== user.id.toString()) {
+                    console.log('AAAAAAA');
+                    console.log('Second user = ' + id);
+                    User.findById(id)
+                      .then(sndUser => {
+                        getMessages(room, user, chat, sndUser)
+                      });
+                  }
+                });
               }
-
             } else {
               next(new ApiError(`Chat not found`, 404));
             }
           }).catch(error => next(error));
-
-
       })
     })
 
-    function getMessages(room, user, messages, chat) {
-      console.log(user.role);
-      if (user.role === "SUPERUSER" || messages.length === 0) {
-        noMessage.firstText = 'This is the beggining of the chat';
-        noMessage.secondText = 'This is the beggining of the chat';
-      } 
-      messages.unshift(noMessage);
-      socket.emit('previousMessages', messages, chat);
-      console.log(user.role);
-      messages.shift();
 
-      messages.forEach((message, index, object) => {
-        if (((user.role === 'SUPERUSER') && (message.createdBy !== user.id) && (!message.wasRead))
-          ||(((user.role === 'USER') && (message.createdBy !== user.id)))){
-          message.wasRead = true;
-          message.save();
-        } 
-      });
-    }
 
     socket.on('leaveALLrooms', () => {
       if (socket.rooms !== {}) {
@@ -207,7 +156,51 @@ module.exports.iosocket = (server) => {
       // socket.emit('updateChatList:SendFromServer', data);
     });
 
+    function getMessages(room, user, chat, sndUser) {
+      if (user && (user.role === 'SUPERUSER')) {
+        Message.find({
+            groupName: room
+          })
+          .then(messages => {
+            emmitAndSaveMessages(room, user, messages, chat, sndUser);
 
+          }).catch(error => next(error));
+      } else if (user && (user.role === 'USER')) {
+        Message.find({
+            groupName: room,
+            wasRead: false,
+            createdBy: {
+              $ne: user.id
+            }
+          })
+          .then(messages => {
+            emmitAndSaveMessages(room, user, messages, chat, sndUser);
+
+          }).catch(error => console.log(error));
+      } else {
+        socket.emit('previousMessages', noMessage, chat, sndUser);
+      }
+    }
+
+    function emmitAndSaveMessages(room, user, messages, chat, sndUser) {
+      console.log(user.role);
+      if (user.role === "SUPERUSER" || messages.length === 0) {
+        noMessage.firstText = 'This is the beggining of the chat';
+        noMessage.secondText = 'This is the beggining of the chat';
+      }
+      messages.unshift(noMessage);
+      socket.emit('previousMessages', messages, chat, sndUser);
+      console.log(user.role);
+      messages.shift();
+
+      messages.forEach((message, index, object) => {
+        if (((user.role === 'SUPERUSER') && (message.createdBy !== user.id) && (!message.wasRead)) ||
+          (((user.role === 'USER') && (message.createdBy !== user.id)))) {
+          message.wasRead = true;
+          message.save();
+        }
+      });
+    }
   })
 
 }
