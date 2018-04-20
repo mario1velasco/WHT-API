@@ -23,6 +23,9 @@ module.exports.iosocket = (server) => {
 
     socket.on('join', (room, user) => {
       console.log('ROOMS ROOMS ROOMS: ', socket.rooms);
+      if(socket.room !== undefined){
+        socket.leave(socket.room);
+      }
       socket.room = room;
       console.log(`JOIN SOCKET ${socket.id}`);
       socket.join(room, () => {
@@ -33,16 +36,12 @@ module.exports.iosocket = (server) => {
             groupName: room
           })
           .then(chat => {
-            console.log('QQQQQQQQ');
-            console.log(chat[0].users);
             if (chat) {
               if (chat[0].users.length <= 1) {
                 getMessages(room, user, chat, {});
               } else {
                 chat[0].users.forEach(id => {
                   if (id.toString() !== user.id.toString()) {
-                    console.log('AAAAAAA');
-                    console.log('Second user = ' + id);
                     User.findById(id)
                       .then(sndUser => {
                         getMessages(room, user, chat, sndUser)
@@ -86,11 +85,18 @@ module.exports.iosocket = (server) => {
 
     function emmitAndSaveMessages(room, user, messages, chat, sndUser) {
       console.log(user.role);
-      if (user.role === "SUPERUSER" || messages.length === 0) {
+      console.log(user.role);
+      console.log(user.role);
+      if (user.role === "SUPERUSER") {
         noMessage.firstText = 'This is the beggining of the chat';
         noMessage.secondText = 'This is the beggining of the chat';
+      }else{
+        noMessage.firstText = 'Become Super User to read old messages';
+        noMessage.secondText ='Become Super User to read old messages';
       }
+      
       messages.unshift(noMessage);
+      console.log(messages);
       socket.emit('previousMessages', messages, chat, sndUser);
       console.log(user.role);
       messages.shift();
